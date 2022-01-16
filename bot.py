@@ -1,10 +1,11 @@
 import os
-
+from telegram import MessageEntity
 from telegram.ext import Updater, CommandHandler, ConversationHandler, MessageHandler, Filters
 from telegram import ChatAction
 import qrcode
 #estados
 STATE_0_TEXT2QR=0
+STATE_0_LINK2QR=0
 #funciones
 def start(update,context):
 
@@ -19,17 +20,20 @@ def qr_code_command_handler(update, context):
 def input_text (update,context):
 
     text=update.message.text
-    #print(text)#prueba
-    filename=generate_code_qr(text)
+    print(text)#prueba
+    chat = update.message.chat
 
-    chat=update.message.chat
+   # entities = update.message.parse_entities([MessageEntity.TEXT_MENTION, MessageEntity.URL, MessageEntity.TEXT_LINK, MessageEntity.HASHTAG])
+   # print(entities)
+
+    filename=generate_code_qr(text,chat)
 
     send_code_qr(filename,chat)
     return ConversationHandler.END
 
-def generate_code_qr(text):
+def generate_code_qr(text, chat):
 
-    filename= text+'.jpg'
+    filename= 'code'+str(chat.id)+'.jpg'# text+'.jpg'
 
     img= qrcode.make(text)
 
@@ -65,7 +69,7 @@ if __name__== '__main__': #la funcion empezaria por aqui
         ],
 
         states={
-            STATE_0_TEXT2QR: [MessageHandler(Filters.text, input_text)]# filtros de texto, videos, imagenes, input_text es una nueva funcion
+            STATE_0_TEXT2QR: [MessageHandler(Filters.text | ( Filters.entity("url") | Filters.entity("text_link")), input_text)],# filtros de texto, videos, imagenes, input_text es una nueva funcion
         },
 
         fallbacks=[]
