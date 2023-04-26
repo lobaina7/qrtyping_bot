@@ -1,1 +1,1 @@
-# telegram bot for coding a text with QR code
+# simple telegram bot for coding a text with QR code
